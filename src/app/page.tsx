@@ -1,15 +1,17 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 
 export default function Home() {
-  const trpc = useTRPC();
-  const { data: users } = useQuery(trpc.getUsers.queryOptions());
+  const { data } = authClient.useSession();
 
   return (
     <div className="min-h-screen min-w-screen flex items-center justify-center">
-      {JSON.stringify(users)}
+      {JSON.stringify(data)}
+
+      {/* renders the logout button, only if the user is logged in */}
+      {data && <Button onClick={() => authClient.signOut()}>Logout</Button>}
     </div>
   );
 }
