@@ -29,21 +29,27 @@ import { Input } from "@/components/ui/input";
 // import { authClient } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-const loginSchema = z.object({
-  email: z.email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
-export function LoginForm() {
-  const router = useRouter();
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+const registerSchema = z
+  .object({
+    email: z.email("Please enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+type RegisterFormData = z.infer<typeof registerSchema>;
+
+export function RegisterForm() {
+  const router = useRouter();
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { email: "", password: "", confirmPassword: "" },
+  });
+
+  const onSubmit = async (data: RegisterFormData) => {
     console.log(data);
   };
 
@@ -53,8 +59,8 @@ export function LoginForm() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle>Welcome back</CardTitle>
-          <CardDescription>Login to your account</CardDescription>
+          <CardTitle>Get Started</CardTitle>
+          <CardDescription>Create your account to get started</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -115,16 +121,33 @@ export function LoginForm() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="********"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <Button type="submit" className="w-full" disabled={isPending}>
-                    Login
+                    Sign up
                   </Button>
                 </div>
 
                 <div className="text-center text-sm">
-                  Don&#39;t have an account?{" "}
-                  <Link href="/signup" className="underline underline-offset-4">
-                    Sign up
+                  Already have an account?{" "}
+                  <Link href="/login" className="underline underline-offset-4">
+                    Login
                   </Link>
                 </div>
               </div>
