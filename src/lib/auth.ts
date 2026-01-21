@@ -10,5 +10,5 @@ export const auth = betterAuth({
   }),
 
   // authentication methods
-  emailAndPassword: { enabled: true, autoVerify: true },
+  emailAndPassword: { enabled: true, autoSignIn: true },
 });
