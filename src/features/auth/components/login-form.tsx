@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
+// import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -27,7 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 // import { authClient } from "@/lib/auth";
-import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address"),
@@ -44,7 +44,17 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log(data);
+    await authClient.signIn.email(
+      { email: data.email, password: data.password, callbackURL: "/" },
+      {
+        onSuccess: () => {
+          router.push("/");
+        },
+        onError: (c) => {
+          toast.error(c.error.message);
+        },
+      },
+    );
   };
 
   const isPending = form.formState.isSubmitting;
