@@ -47,11 +47,9 @@ export function LoginForm() {
     await authClient.signIn.email(
       { email: data.email, password: data.password, callbackURL: "/" },
       {
-        onSuccess: () => {
-          router.push("/");
-        },
-        onError: (c) => {
-          toast.error(c.error.message);
+        onSuccess: () => router.push("/"),
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
         },
       },
     );
