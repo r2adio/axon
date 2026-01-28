@@ -11,16 +11,17 @@ export const appRouter = createTRPCRouter({
     return prisma.workflow.findMany();
   }),
 
-  createWorkflow: protectedProcedure.mutation(async () => {
+  createWorkflow: protectedProcedure.mutation(async ({ ctx }) => {
     // instead of adding long processing here, we will use background jobs (e.g. with BullMQ)
     // it handles the job processing outside of the request-response cycle
 
     // invokes the inngest function automatically in the background
     await inngest.send({
       name: "axon/workflow.created", // function to invoke
-      data: { email: "test@mail.com" },
+      data: { email: ctx.auth.user.email, userId: ctx.auth.user.id },
     });
 
+    // immediate response
     return {
       success: true,
       message: "Workflow creation started in background",
