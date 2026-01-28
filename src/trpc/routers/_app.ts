@@ -1,3 +1,4 @@
+import { inngest } from "@/inngest/client";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import prisma from "@/lib/prisma";
 export const appRouter = createTRPCRouter({
@@ -14,11 +15,16 @@ export const appRouter = createTRPCRouter({
     // instead of adding long processing here, we will use background jobs (e.g. with BullMQ)
     // it handles the job processing outside of the request-response cycle
 
-    return prisma.workflow.create({
-      data: {
-        name: "new workflow",
-      },
+    // invokes the inngest function automatically in the background
+    await inngest.send({
+      name: "axon/workflow.created", // function to invoke
+      data: { email: "test@mail.com" },
     });
+
+    return {
+      success: true,
+      message: "Workflow creation started in background",
+    };
   }),
 });
 // export type definition of API
