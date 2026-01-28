@@ -10,7 +10,10 @@ export const appRouter = createTRPCRouter({
     return prisma.workflow.findMany();
   }),
 
-  createWorkflow: protectedProcedure.mutation(() => {
+  createWorkflow: protectedProcedure.mutation(async () => {
+    // instead of adding long processing here, we will use background jobs (e.g. with BullMQ)
+    // it handles the job processing outside of the request-response cycle
+
     return prisma.workflow.create({
       data: {
         name: "new workflow",
