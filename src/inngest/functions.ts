@@ -7,12 +7,11 @@ import { generateText } from "ai";
 
 import * as Sentry from "@sentry/nextjs";
 
-// Helper function to check if API key is available and valid
+// check if API key is defined and not empty
 const hasApiKey = (key: string | undefined): boolean => {
   return Boolean(key && key.trim() !== "" && key !== "undefined");
 };
 
-// Conditional provider initialization based on API key availability
 const providers = {
   google: hasApiKey(process.env.GOOGLE_GENERATIVE_AI_API_KEY)
     ? createGoogleGenerativeAI()
@@ -26,7 +25,7 @@ const providers = {
 export const execute = inngest.createFunction(
   { id: "execute-ai" },
   { event: "execute/ai.task" }, // trigger on this event
-  async ({ event, step }) => {
+  async ({ step }) => {
     // using Sentry to log information about the function execution
     Sentry.logger.info("User triggered AI text generation task", {
       log_source: "sentry_test",
@@ -35,7 +34,6 @@ export const execute = inngest.createFunction(
     const results: Record<string, unknown> = {};
     const errors: Array<{ provider: string; error: unknown }> = [];
 
-    // Execute Gemini (Google) if API key is available
     if (providers.google) {
       try {
         const { steps: geminiSteps } = await step.ai.wrap(
@@ -69,7 +67,6 @@ export const execute = inngest.createFunction(
       });
     }
 
-    // Execute OpenAI if API key is available
     if (providers.openai) {
       try {
         const { steps: openaiSteps } = await step.ai.wrap(
@@ -103,7 +100,6 @@ export const execute = inngest.createFunction(
       });
     }
 
-    // Execute Anthropic if API key is available
     if (providers.anthropic) {
       try {
         const { steps: anthropicSteps } = await step.ai.wrap(
@@ -137,7 +133,6 @@ export const execute = inngest.createFunction(
       });
     }
 
-    // Log execution summary
     Sentry.logger.info("AI task execution completed", {
       successfulProviders: Object.keys(results),
       failedProviders: errors.map((e) => e.provider),
@@ -152,6 +147,41 @@ export const execute = inngest.createFunction(
         successfulProviders: Object.keys(results).length,
         failedProviders: errors.length,
       },
+    };
+  },
+);
+
+export const createWorkflow = inngest.createFunction(
+  { id: "workflow-creation" },
+  { event: "axon/workflow.created" }, // trigger on this event
+  async ({ event, step }) => {
+    Sentry.logger.info("User triggered workflow creation", {
+      log_source: "sentry_test",
+      userId: event.data.userId,
+      email: event.data.email,
+    });
+
+    // create workflow in database
+    const workflow = await step.run("create-workflow", async () => {
+      return prisma.workflow.create({
+        data: {
+          name: `workflow ${Date.now()}`,
+          userId: event.data.userId,
+        },
+      });
+    });
+
+    Sentry.logger.info("Workflow created successfully", {
+      log_source: "sentry_test",
+      workflowId: workflow.id,
+      userId: event.data.userId,
+    });
+
+    return {
+      success: true,
+      workflowId: workflow.id,
+      workflowName: workflow.name,
+      userId: event.data.userId,
     };
   },
 );
