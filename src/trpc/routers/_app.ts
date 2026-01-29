@@ -1,7 +1,13 @@
 import { inngest } from "@/inngest/client";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import prisma from "@/lib/prisma";
+
 export const appRouter = createTRPCRouter({
+  testAPI: protectedProcedure.mutation(async () => {
+    await inngest.send({ name: "execute/ai.task" });
+    return { success: true, message: "Inngest function invoked" };
+  }),
+
   getWorkflows: protectedProcedure.query(() => {
     // console.log({ userId: ctx.auth.user.id });
 
