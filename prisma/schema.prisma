@@ -19,6 +19,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  workflows     Workflow[]
   @@unique([email])
   @@map("user")
 }
@@ -69,4 +70,13 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Workflow {
+  id     String @id @default(cuid())
+  name   String
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("workflow")
 }
