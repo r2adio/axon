@@ -2,8 +2,9 @@ import { inngest } from "@/inngest/client";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import prisma from "@/lib/prisma";
 
+// updating protectedProcedure to premiumProcedure will restrict access to premium users only
 export const appRouter = createTRPCRouter({
-  testAPI: protectedProcedure.mutation(async () => {
+  testAI: protectedProcedure.mutation(async () => {
     await inngest.send({ name: "execute/ai.task" });
     return { success: true, message: "Inngest function invoked" };
   }),
